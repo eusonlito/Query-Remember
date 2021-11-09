@@ -2,11 +2,8 @@
 
 namespace Tests;
 
-use Illuminate\Contracts\Cache\Factory;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Cache;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +39,6 @@ class QueryRememberTest extends TestCase
                     'email_verified_at' => today(),
                 ])->save();
             }
-
         });
 
         parent::setUp();
@@ -55,10 +51,12 @@ class QueryRememberTest extends TestCase
         static::assertInstanceOf(QueryRemember::class, DB::table('users')->remember(60));
         static::assertInstanceOf(QueryRemember::class, User::remember(60));
 
-        static::assertInstanceOf(QueryRemember::class,
+        static::assertInstanceOf(
+            QueryRemember::class,
             DB::table('users')->where('password')->remember(60)
         );
-        static::assertInstanceOf(QueryRemember::class,
+        static::assertInstanceOf(
+            QueryRemember::class,
             User::where('password', null)->remember(60)
         );
     }

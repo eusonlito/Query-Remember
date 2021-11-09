@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eusonlito\QueryRemember;
 
@@ -41,10 +41,6 @@ class ServiceProvider extends ServiceProviderVendor
      */
     protected function setup(): void
     {
-        if ($this->config('enabled') === false) {
-            return;
-        }
-
         $macro = $this->macro();
 
         if (QueryBuilder::hasMacro('remember') === false) {
@@ -54,6 +50,29 @@ class ServiceProvider extends ServiceProviderVendor
         if (EloquentBuilder::hasGlobalMacro('remember') === false) {
             EloquentBuilder::macro('remember', $macro);
         }
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function macro(): Closure
+    {
+        if ($this->config('enabled') === false) {
+            return function () {
+                return $this;
+            };
+        }
+
+        $config = $this->config();
+        $cache = $this->cache();
+
+        return function (
+            int|DateTimeInterface|DateInterval|null $ttl = null,
+            ?string $key = null,
+            int $wait = 0
+        ) use ($cache, $config): QueryRemember {
+            return new QueryRemember($this, $cache, $config, $ttl, $key, $wait);
+        };
     }
 
     /**
@@ -88,22 +107,5 @@ class ServiceProvider extends ServiceProviderVendor
     public function cache(): Repository
     {
         return resolve('cache')->store($this->config('cache'));
-    }
-
-    /**
-     * @return \Closure
-     */
-    public function macro(): Closure
-    {
-        $cache = $this->cache();
-        $config = $this->config();
-
-        return function (
-            int|DateTimeInterface|DateInterval|null $ttl = null,
-            ?string $key = null,
-            int $wait = 0
-        ) use ($cache, $config): QueryRemember {
-            return new QueryRemember($this, $cache, $config, $ttl, $key, $wait);
-        };
     }
 }

@@ -1,15 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eusonlito\QueryRemember;
 
 use DateInterval;
 use DateTimeInterface;
 use Illuminate\Cache\TaggableStore;
-use Illuminate\Contracts\Cache\Factory;
-use Illuminate\Contracts\Cache\LockProvider as LockProviderAlias;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Traits\ForwardsCalls;
 use RuntimeException;
@@ -33,7 +30,8 @@ class QueryRemember
         protected int|DateTimeInterface|DateInterval|null $ttl = null,
         protected ?string $key = null,
         protected int $wait = 0
-    ) {}
+    ) {
+    }
 
     /**
      * @return string
@@ -67,8 +65,10 @@ class QueryRemember
      */
     public function __call(string $method, array $arguments): mixed
     {
-        return $this->cache()->remember($this->key(), $this->ttl(), fn () =>
-            $this->wait
+        return $this->cache()->remember(
+            $this->key(),
+            $this->ttl(),
+            fn () => $this->wait
                 ? $this->getLockResult($method, $arguments)
                 : $this->getResult($method, $arguments)
         );
@@ -171,7 +171,7 @@ class QueryRemember
     {
         return $this->cache()
             ->lock($this->key(), $this->wait)
-            ->block($this->wait, fn() => $this->getResult($method, $arguments));
+            ->block($this->wait, fn () => $this->getResult($method, $arguments));
     }
 
     /**
