@@ -1,3 +1,5 @@
+Moved to a new repository that manages the cache in a much more efficient way: https://github.com/eusonlito/laravel-database-cache
+
 # Query Remember
 
 Based on https://github.com/DarkGhostHunter/RememberableQuery, but with tags and more focused on Eloquent.
